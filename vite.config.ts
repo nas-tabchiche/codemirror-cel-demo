@@ -1,14 +1,14 @@
-import { defineConfig } from 'vite';
-import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { defineConfig } from "vite";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 export default defineConfig({
-	plugins: [svelte()],
-	resolve: {
-		alias: {
-			events: 'events'
-		}
-	},
-	optimizeDeps: {
-		include: ['events']
-	}
+  plugins: [svelte()],
+  resolve: {
+    alias: {
+      events: "events",
+    },
+  },
+  optimizeDeps: {
+    include: ["events"],
+  },
 });
