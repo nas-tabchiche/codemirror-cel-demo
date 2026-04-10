@@ -1,55 +1,23 @@
 <script lang="ts">
   import CelEditor from "./lib/CelEditor.svelte";
+  import type { CelLanguageConfig } from "./lib/cel/cel-language";
   import { evaluate } from "cel-js";
 
-  // CISO Assistant CEL context — mirrors the variables available
-  // in FrameworkBuilder outcome rules and visibility expressions.
-  const assessmentVariables = [
-    {
-      name: "assessment",
-      type: {
-        kind: "map" as const,
-        keyType: "string" as const,
-        valueType: "dyn" as const,
-      },
-    },
-    {
-      name: "requirements",
-      type: {
-        kind: "map" as const,
-        keyType: "string" as const,
-        valueType: "dyn" as const,
-      },
-    },
-    {
-      name: "ref_ids",
-      type: {
-        kind: "map" as const,
-        keyType: "string" as const,
-        valueType: "dyn" as const,
-      },
-    },
-    {
-      name: "answers",
-      type: {
-        kind: "map" as const,
-        keyType: "string" as const,
-        valueType: "dyn" as const,
-      },
-    },
-    {
-      name: "computed_outcomes",
-      type: {
-        kind: "map" as const,
-        keyType: "string" as const,
-        valueType: "dyn" as const,
-      },
-    },
-    {
-      name: "hidden_requirements",
-      type: { kind: "list" as const, elementType: "string" as const },
-    },
-  ];
+  // Autocomplete entries for the CISO Assistant CEL context.
+  const celConfig: CelLanguageConfig = {
+    completions: [
+      { label: "assessment", type: "variable", detail: "map", info: "Assessment-level aggregates" },
+      { label: "assessment.score_sum", type: "property", detail: "int", info: "Sum of all requirement scores" },
+      { label: "assessment.score_max", type: "property", detail: "int", info: "Maximum possible score" },
+      { label: "assessment.answered_count", type: "property", detail: "int", info: "Number of answered requirements" },
+      { label: "assessment.total_count", type: "property", detail: "int", info: "Total assessable requirements" },
+      { label: "requirements", type: "variable", detail: "map<string, map>", info: "Keyed by URN — .score, .max_score, .result, .status" },
+      { label: "ref_ids", type: "variable", detail: "map<string, map>", info: "Keyed by ref_id — .score, .max_score, .result, .status" },
+      { label: "answers", type: "variable", detail: "map<string, map>", info: "Keyed by question URN — .score, .value, .selected_choices, .weight, .type" },
+      { label: "computed_outcomes", type: "variable", detail: "map<string, map>", info: "Previously computed outcome ref_ids" },
+      { label: "hidden_requirements", type: "variable", detail: "list<string>", info: "URNs of hidden requirements" },
+    ],
+  };
 
   // Sample execution context — mirrors what cel_service.py builds from a real assessment.
   // Users can edit this JSON to test different scenarios.
@@ -201,8 +169,8 @@
   <header>
     <h1>CEL Editor for CISO Assistant</h1>
     <p class="subtitle">
-      CodeMirror 6 + <code>codemirror-cel</code> — syntax highlighting, autocomplete,
-      type checking, and hover tooltips for CEL expressions
+      CodeMirror 6 + custom Lezer grammar — syntax highlighting, bracket matching,
+      and autocomplete for CEL expressions
     </p>
   </header>
 
@@ -232,7 +200,7 @@
       {#key selectedIdx}
         <CelEditor
           doc={examples[selectedIdx].doc}
-          variables={assessmentVariables}
+          celConfig={celConfig}
           theme="dark"
           onchange={(v) => (currentValue = v)}
         />
@@ -308,13 +276,6 @@
     margin: 0;
     color: #94a3b8;
     font-size: 15px;
-  }
-
-  .subtitle code {
-    background: #1e293b;
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: #7dd3fc;
   }
 
   .layout {
